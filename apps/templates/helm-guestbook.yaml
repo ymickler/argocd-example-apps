@@ -3,6 +3,11 @@ kind: Application
 metadata:
   name: helm-guestbook
   namespace: argocd
+  annotations:
+    # Existing notification annotations
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: "k8s-deployment-status"
+    notifications.argoproj.io/subscribe.on-update-started.slack: "k8s-deployment-status"
+    notifications.argoproj.io/subscribe.on-update-failed.slack: "k8s-deployment-status"
   finalizers:
   - resources-finalizer.argocd.argoproj.io
 spec:
@@ -14,3 +19,13 @@ spec:
     path: helm-guestbook
     repoURL: {{ .Values.spec.source.repoURL }}
     targetRevision: {{ .Values.spec.source.targetRevision }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
